@@ -29,7 +29,7 @@
  *
  * @package   NFePHP
  * @name      ToolsNFePHP
- * @version   3.10.08-beta
+ * @version   3.10.09-beta
  * @license   http://www.gnu.org/licenses/gpl.html GNU/GPL v.3
  * @copyright 2009-2012 &copy; NFePHP
  * @link      http://www.nfephp.org/
@@ -1703,8 +1703,10 @@ class ToolsNFePHP extends CommonNFePHP
             $urlservico = $aURL[$servico]['URL'];
             //recuperação do método
             $metodo = $aURL[$servico]['method'];
+            //recuperação da operação
+            $operation = $aURL[$servico]['operation'];
             //montagem do namespace do serviço
-            $namespace = $this->URLPortal.'/wsdl/'.$servico.'2';
+            $namespace = $this->URLPortal.'/wsdl/'.$operation;
             //montagem do cabeçalho da comunicação SOAP
             $cabec = "<nfeCabecMsg xmlns=\"$namespace\">"
                     . "<cUF>$cUF</cUF>"
@@ -2690,7 +2692,8 @@ class ToolsNFePHP extends CommonNFePHP
                     $chNFe = $resNFe->getElementsByTagName('chNFe')->item(0)->nodeValue;
                     $CNPJ = $resNFe->getElementsByTagName('CNPJ')->item(0)->nodeValue;
                     $xNome = $resNFe->getElementsByTagName('xNome')->item(0)->nodeValue;
-                    $dhEmi = $resNFe->getElementsByTagName('dhEmi')->item(0)->nodeValue;
+                    $dEmi = $resNFe->getElementsByTagName('dEmi')->item(0)->nodeValue;
+                    $vNF = $resNFe->getElementsByTagName('vNF')->item(0)->nodeValue;
                     $dhRecbto= $resNFe->getElementsByTagName('dhRecbto')->item(0)->nodeValue;
                     $tpNF = $resNFe->getElementsByTagName('tpNF')->item(0)->nodeValue;
                     $cSitNFe = $resNFe->getElementsByTagName('cSitNFe')->item(0)->nodeValue;
@@ -2700,7 +2703,8 @@ class ToolsNFePHP extends CommonNFePHP
                         'NSU'=>$nsu,
                         'CNPJ'=>$CNPJ,
                         'xNome'=>$xNome,
-                        'dhEmi'=>$dhEmi,
+                        'dEmi'=>$dEmi,
+                        'vNF'=>$vNF,
                         'dhRecbto'=>$dhRecbto,
                         'tpNF'=>$tpNF,
                         'cSitNFe'=>$cSitNFe,
@@ -2713,7 +2717,8 @@ class ToolsNFePHP extends CommonNFePHP
                     $chNFe = $resCanc->getElementsByTagName('chNFe')->item(0)->nodeValue;
                     $CNPJ = $resCanc->getElementsByTagName('CNPJ')->item(0)->nodeValue;
                     $xNome = $resCanc->getElementsByTagName('xNome')->item(0)->nodeValue;
-                    $dhEmi = $resCanc->getElementsByTagName('dhEmi')->item(0)->nodeValue;
+                    $dEmi = $resCanc->getElementsByTagName('dEmi')->item(0)->nodeValue;
+                    $vNF = $resCanc->getElementsByTagName('vNF')->item(0)->nodeValue;
                     $dhRecbto= $resCanc->getElementsByTagName('dhRecbto')->item(0)->nodeValue;
                     $tpNF = $resCanc->getElementsByTagName('tpNF')->item(0)->nodeValue;
                     $cSitNFe = $resCanc->getElementsByTagName('cSitNFe')->item(0)->nodeValue;
@@ -2723,7 +2728,8 @@ class ToolsNFePHP extends CommonNFePHP
                         'NSU'=>$nsu,
                         'CNPJ'=>$CNPJ,
                         'xNome'=>$xNome,
-                        'dhEmi'=>$dhEmi,
+                        'dEmi'=>$dEmi,
+                        'vNF'=>$vNF,
                         'dhRecbto'=>$dhRecbto,
                         'tpNF'=>$tpNF,
                         'cSitNFe'=>$cSitNFe,
@@ -4355,10 +4361,12 @@ class ToolsNFePHP extends CommonNFePHP
                 //acrescenta a cadeia completa dos certificados se estiverem
                 //inclusas no arquivo pfx, caso contrario deverão ser inclusas
                 //manualmente para acessar os serviços em GO
-                $aCer = $x509certdata['extracerts'];
                 $chain = '';
-                foreach ($aCer as $cert) {
-                    $chain .= "$cert";
+                if (isset($x509certdata['extracerts'])) {
+                    $aCer = $x509certdata['extracerts'];
+                    foreach ($aCer as $cert) {
+                        $chain .= "$cert";
+                    }
                 }
                 file_put_contents($this->pubKEY, $x509certdata['cert']);
                 file_put_contents($this->certKEY, $x509certdata['cert'] . $chain);
@@ -4649,7 +4657,8 @@ class ToolsNFePHP extends CommonNFePHP
             curl_setopt($oCurl, CURLOPT_PORT, 443);
             curl_setopt($oCurl, CURLOPT_VERBOSE, 1);
             curl_setopt($oCurl, CURLOPT_HEADER, 1); //retorna o cabeçalho de resposta
-            curl_setopt($oCurl, CURLOPT_SSLVERSION, 3);
+            curl_setopt($oCurl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            //curl_setopt($oCurl, CURLOPT_SSLVERSION, 3);
             curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, 2); // verifica o host evita MITM
             curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($oCurl, CURLOPT_SSLCERT, $this->certKEY);
@@ -4693,7 +4702,7 @@ class ToolsNFePHP extends CommonNFePHP
             if ($xml === false || $posX === false) {
                 //não houve retorno
                 $msg = curl_error($oCurl);
-                if (isset($info['http_code'])) {
+                if ($info['http_code'] >= 100) {
                     $msg .= $info['http_code'].$cCode[$info['http_code']];
                 }
                 throw new nfephpException($msg);
@@ -4705,6 +4714,9 @@ class ToolsNFePHP extends CommonNFePHP
                 }
             }
             curl_close($oCurl);
+            if ($info['http_code'] != 200) {
+                $xml = '';
+            }
             return $xml;
         } catch (nfephpException $e) {
             $this->pSetError($e->getMessage());

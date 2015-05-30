@@ -27,7 +27,7 @@
  *
  * @package     NFePHP
  * @name        ConvertNFePHP
- * @version     3.10.19
+ * @version     3.10.20
  * @license     http://www.gnu.org/licenses/gpl.html GNU/GPL v.3
  * @license     http://www.gnu.org/licenses/lgpl.html GNU/LGPL v.3
  * @copyright   2009-2015 &copy; NFePHP
@@ -538,7 +538,7 @@ class ConvertNFePHP
                         $dest->appendChild($xNome);
                         $indIEDest = $dom->createElement("indIEDest", $dados[2]);
                         $dest->appendChild($indIEDest);
-                        if ($dados[2] != '2' && $dados[2] != '9') {
+                        if ($dados[3] != '' && $dados[3] != 'ISENTO' && $dados[2] != '9') {
                             $IE = $dom->createElement("IE", $dados[3]);
                             $dest->appendChild($IE);
                         }
@@ -759,79 +759,73 @@ class ConvertNFePHP
                     $NCM = $dom->createElement("NCM", $dados[4]);
                     $prod->appendChild($NCM);
                     if (!empty($dados[5])) {
-                        //Esperar estabilidade do Emissor de NF-e 3.10 para saber se poderemos manter compatibilidade com o modo de importação do mesmo.
-                        // São aceitos [0-8] NVE, mas o emissor EXPORTA apenas 1. Atualmente (15/09/14) ainda não é possível testar a importação do TXT no emissor.
-                        $NVE = $dom->createElement("NVE", $dados[5]);
-                        $prod->appendChild($NVE);
-                    }
-                    if (!empty($dados[6])) {
-                        $EXTIPI = $dom->createElement("EXTIPI", $dados[6]);
+                        $EXTIPI = $dom->createElement("EXTIPI", $dados[5]);
                         $prod->appendChild($EXTIPI);
                     }
-                    $CFOP = $dom->createElement("CFOP", $dados[7]);
+                    $CFOP = $dom->createElement("CFOP", $dados[6]);
                     $prod->appendChild($CFOP);
-                    $uCom = $dom->createElement("uCom", $dados[8]);
+                    $uCom = $dom->createElement("uCom", $dados[7]);
                     $prod->appendChild($uCom);
-                    $qCom = $dom->createElement("qCom", $dados[9]);
+                    $qCom = $dom->createElement("qCom", $dados[8]);
                     $prod->appendChild($qCom);
-                    $vUnCom = $dom->createElement("vUnCom", $dados[10]);
+                    $vUnCom = $dom->createElement("vUnCom", $dados[9]);
                     $prod->appendChild($vUnCom);
-                    $vProd = $dom->createElement("vProd", $dados[11]);
+                    $vProd = $dom->createElement("vProd", $dados[10]);
                     $prod->appendChild($vProd);
-                    $cEANTrib = $dom->createElement("cEANTrib", $dados[12]);
+                    $cEANTrib = $dom->createElement("cEANTrib", $dados[11]);
                     $prod->appendChild($cEANTrib);
-                    if (!empty($dados[13])) {
-                        $uTrib = $dom->createElement("uTrib", $dados[13]);
+                    if (!empty($dados[12])) {
+                        $uTrib = $dom->createElement("uTrib", $dados[12]);
                     } else {
-                        $uTrib = $dom->createElement("uTrib", $dados[8]);
+                        $uTrib = $dom->createElement("uTrib", $dados[7]);
                     }
                     $prod->appendChild($uTrib);
-                    if (!empty($dados[14])) {
-                        $qTrib = $dom->createElement("qTrib", $dados[14]);
+                    if (!empty($dados[13])) {
+                        $qTrib = $dom->createElement("qTrib", $dados[13]);
                     } else {
-                        $qTrib = $dom->createElement("qTrib", $dados[9]);
+                        $qTrib = $dom->createElement("qTrib", $dados[8]);
                     }
                     $prod->appendChild($qTrib);
-                    if (!empty($dados[15])) {
-                        $vUnTrib = $dom->createElement("vUnTrib", $dados[15]);
+                    if (!empty($dados[14])) {
+                        $vUnTrib = $dom->createElement("vUnTrib", $dados[14]);
                     } else {
-                        $vUnTrib = $dom->createElement("vUnTrib", $dados[10]);
+                        $vUnTrib = $dom->createElement("vUnTrib", $dados[9]);
                     }
                     $prod->appendChild($vUnTrib);
-                    if (!empty($dados[16])) {
-                        $vFrete = $dom->createElement("vFrete", $dados[16]);
+                    if (!empty($dados[15])) {
+                        $vFrete = $dom->createElement("vFrete", $dados[15]);
                         $prod->appendChild($vFrete);
                     }
-                    if (!empty($dados[17])) {
-                        $vSeg = $dom->createElement("vSeg", $dados[17]);
+                    if (!empty($dados[16])) {
+                        $vSeg = $dom->createElement("vSeg", $dados[16]);
                         $prod->appendChild($vSeg);
                     }
-                    if (!empty($dados[18])) {
-                        $vDesc = $dom->createElement("vDesc", $dados[18]);
+                    if (!empty($dados[17])) {
+                        $vDesc = $dom->createElement("vDesc", $dados[17]);
                         $prod->appendChild($vDesc);
                     }
-                    if (!empty($dados[19])) {
-                        $vOutro = $dom->createElement("vOutro", $dados[19]);
+                    if (!empty($dados[18])) {
+                        $vOutro = $dom->createElement("vOutro", $dados[18]);
                         $prod->appendChild($vOutro);
                     }
-                    if (!empty($dados[20]) || $dados[20] == 0) {
-                        $indTot = $dom->createElement("indTot", $dados[20]);
+                    if (!empty($dados[19]) || $dados[19] == 0) {
+                        $indTot = $dom->createElement("indTot", $dados[19]);
                         $prod->appendChild($indTot);
                     } else {
                         $indTot = $dom->createElement("indTot", '0');
                         $prod->appendChild($indTot);
                     }
-                    if (sizeof($dados) > 20) {
-                        if (!empty($dados[21])) {
-                            $xPed = $dom->createElement("xPed", $dados[21]);
+                    if (sizeof($dados) > 19) {
+                        if (!empty($dados[20])) {
+                            $xPed = $dom->createElement("xPed", $dados[20]);
                             $prod->appendChild($xPed);
                         }
-                        if (!empty($dados[22])) {
-                            $nItemPed = $dom->createElement("nItemPed", $dados[22]);
+                        if (!empty($dados[21])) {
+                            $nItemPed = $dom->createElement("nItemPed", $dados[21]);
                             $prod->appendChild($nItemPed);
                         }
-                        if (!empty($dados[23])) {
-                            $nFCI = $dom->createElement("nFCI", $dados[23]);
+                        if (!empty($dados[22])) {
+                            $nFCI = $dom->createElement("nFCI", $dados[22]);
                             $prod->appendChild($nFCI);
                         }
                     }
@@ -841,6 +835,11 @@ class ConvertNFePHP
                         $det->insertBefore($det->appendChild($prod), $infAdProd);
                     }
                     break;
+                case "I05a":
+                    //Tag da Codificacao NVE
+                    //I05a|NVE|
+                    $NVE = $dom->createElement("NVE", $dados[1]);
+                    $prod->appendChild($NVE);
                 case "I18":
                     //Tag da Declaração de Importação [prod]
                     //I18|nDI|dDI|xLocDesemb|UFDesemb|dDesemb|tpViaTransp|vAFRMM|tpIntermedio|CNPJ|UFTerceiro|cExportador|
@@ -1343,10 +1342,12 @@ class ConvertNFePHP
                     $ICMS60->appendChild($orig);
                     $CST = $dom->createElement("CST", $dados[2]);
                     $ICMS60->appendChild($CST);
-                    $vBCST = $dom->createElement("vBCSTRet", $dados[3]);
-                    $ICMS60->appendChild($vBCST);
-                    $vICMSST = $dom->createElement("vICMSSTRet", $dados[4]);
-                    $ICMS60->appendChild($vICMSST);
+                    if (!empty($dados[3]) && !empty($dados[4])) {
+                        $vBCST = $dom->createElement("vBCSTRet", $dados[3]);
+                        $ICMS60->appendChild($vBCST);
+                        $vICMSST = $dom->createElement("vICMSSTRet", $dados[4]);
+                        $ICMS60->appendChild($vICMSST);
+                    }
                     $ICMS->appendChild($ICMS60);
                     break;
                 case "N09":
@@ -1428,9 +1429,9 @@ class ConvertNFePHP
                     $vICMSST = $dom->createElement("vICMSST", $dados[13]);
                     $ICMS90->appendChild($vICMSST);
                     if (!empty($dados[14]) || !empty($dados[15])) {
-                        $vICMSDeson = $dom->createElement("vICMSDeson",$dados[14]);
+                        $vICMSDeson = $dom->createElement("vICMSDeson", $dados[14]);
                         $ICMS90->appendChild($vICMSDeson);
-                        $motDesICMS = $dom->createElement("motDesICMS",$dados[15]);
+                        $motDesICMS = $dom->createElement("motDesICMS", $dados[15]);
                         $ICMS90->appendChild($motDesICMS);
                     }
                     $ICMS->appendChild($ICMS90);
@@ -1586,10 +1587,12 @@ class ConvertNFePHP
                     $ICMSSN500->appendChild($orig);
                     $CSOSN = $dom->createElement("CSOSN", $dados[2]);
                     $ICMSSN500->appendChild($CSOSN);
-                    $vBCSTRet = $dom->createElement("vBCSTRet", $dados[3]);
-                    $ICMSSN500->appendChild($vBCSTRet);
-                    $vICMSSTRet = $dom->createElement("vICMSSTRet", $dados[4]);
-                    $ICMSSN500->appendChild($vICMSSTRet);
+                    if (!empty($dados[3]) && !empty($dados[4])) {
+                        $vBCSTRet = $dom->createElement("vBCSTRet", $dados[3]);
+                        $ICMSSN500->appendChild($vBCSTRet);
+                        $vICMSSTRet = $dom->createElement("vICMSSTRet", $dados[4]);
+                        $ICMSSN500->appendChild($vICMSSTRet);
+                    }
                     $ICMS->appendChild($ICMSSN500);
                     break;
                 case "N10h":
@@ -1704,12 +1707,11 @@ class ConvertNFePHP
                 case "O11":
                     //Quantidade total e Valor 0 ou 1 [IPITrib]
                     // todos esses campos sao obrigatorios
-                    //O11|qUnid|vUnid|vIPI|
+                    //O11|qUnid|vUnid|
                     $qUnid = $dom->createElement("qUnid", $dados[1]);
                     $IPITrib->insertBefore($IPITrib->appendChild($qUnid), $vIPI);
                     $vUnid = $dom->createElement("vUnid", $dados[2]);
                     $IPITrib->insertBefore($IPITrib->appendChild($vUnid), $vIPI);
-                    //$dados[3] seria vIPI novamente (mesmo da TAG PAI O07), mas não há esta informação na NT 2013/005 (xml)
                     break;
                 case "O08":
                     //Grupo IPI Não tributavel 0 ou 1 [IPI]
@@ -1782,18 +1784,18 @@ class ConvertNFePHP
                     break;
                 case "Q05":
                     //Grupo de PIS Outras Operações 0 ou 1 [PIS]
-                    //Q05|CST|vPIS|
+                    //Q05|CST|
                     $PISOutr = $dom->createElement("PISOutr");
                     $CST = $dom->createElement("CST", $dados[1]);
                     $PISOutr->appendChild($CST);
-                    $vPIS = $dom->createElement("vPIS", $dados[2]);
-                    $PISOutr->appendChild($vPIS);
-                    $PIS->appendChild($PISOutr);
                     break;
                 case "Q07":
                     //Valor da Base de Cálculo do PIS e Alíquota do PIS (em percentual) 0 pu 1 [PISOutr]
                     // todos esses campos sao obrigatorios
-                    //Q07|vBC|pPIS|
+                    //Q07|vBC|pPIS|vPIS|
+                    $vPIS = $dom->createElement("vPIS", $dados[3]);
+                    $PISOutr->appendChild($vPIS);
+                    $PIS->appendChild($PISOutr);
                     $vBC = $dom->createElement("vBC", $dados[1]);
                     $PISOutr->insertBefore($vBC, $vPIS);
                     $pPIS = $dom->createElement("pPIS", $dados[2]);
@@ -2377,9 +2379,9 @@ class ConvertNFePHP
                     $procRef = $dom->createElement("procRef");
                     $nProc = $dom->createElement("nProc", $dados[1]);
                     $procRef->appendChild($nProc);
-                    $procRef = $dom->createElement("indProc", $dados[2]);
+                    $indProc = $dom->createElement("indProc", $dados[2]);
                     $procRef->appendChild($indProc);
-                    $infAdic->appendChild($proRef);
+                    $infAdic->appendChild($procRef);
                     break;
                 case "ZA":
                     //Grupo de Exportação 0 ou 1 [infNFe]
