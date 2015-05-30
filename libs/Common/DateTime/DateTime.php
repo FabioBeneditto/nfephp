@@ -1,6 +1,6 @@
 <?php
 
-namespace Common\DateTime;
+namespace NFePHP\Common\DateTime;
 
 /**
  * Classe auxiliar para tratar datas
@@ -76,10 +76,16 @@ class DateTime
         if ($dataHora == '') {
             return '';
         }
+        //inserido devido a casos de má formação do xml com
+        //TZD +00:00 por exemplo
+        $dataHora = str_replace('+', '-', $dataHora);
         $aDH = explode('T', $dataHora);
         $adDH = explode('-', $aDH[0]);
-        $inter = explode('-', $aDH[1]);
-        $atDH = explode(':', $inter[0]);
+        $atDH = array('0','0','0');
+        if (count($aDH) == 2) {
+            $inter = explode('-', $aDH[1]);
+            $atDH = explode(':', $inter[0]);
+        }
         $timestamp = mktime($atDH[0], $atDH[1], $atDH[2], $adDH[1], $adDH[2], $adDH[0]);
         return $timestamp;
     }

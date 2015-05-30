@@ -1,6 +1,6 @@
 <?php
 
-namespace Common\Certificate;
+namespace NFePHP\Common\Certificate;
 
 /**
  * Classe para tratamento e uso dos certificados digitais modelo A1 (PKCS12)
@@ -13,9 +13,9 @@ namespace Common\Certificate;
  * @link       http://github.com/nfephp-org/nfephp for the canonical source repository
  */
 
-use Common\Certificate\Asn;
-use Common\Exception;
-use Common\Dom\Dom;
+use NFePHP\Common\Certificate\Asn;
+use NFePHP\Common\Exception;
+use NFePHP\Common\Dom\Dom;
 
 class Pkcs12
 {
@@ -367,10 +367,11 @@ class Pkcs12
         $objSSLPriKey = openssl_get_privatekey($this->priKey);
         if ($objSSLPriKey === false) {
             $msg = "Houve erro no carregamento da chave privada.";
-            while ($erro = openssl_error_string()) {
-                $msg .= $erro . "\n";
-            }
-            throw new Exception\RuntimeException($msg);
+            $this->zGetOpenSSLError($msg);
+            //while ($erro = openssl_error_string()) {
+            //    $msg .= $erro . "\n";
+            //}
+            //throw new Exception\RuntimeException($msg);
         }
         $xml = $docxml;
         if (is_file($docxml)) {
@@ -487,10 +488,11 @@ class Pkcs12
         //usando a chave privada em formato PEM
         if (! openssl_sign($cnSignedInfoNode, $signature, $objSSLPriKey)) {
             $msg = "Houve erro durante a assinatura digital.\n";
-            while ($erro = openssl_error_string()) {
-                $msg .= $erro . "\n";
-            }
-            throw new Exception\RuntimeException($msg);
+            $this->zGetOpenSSLError($msg);
+            //while ($erro = openssl_error_string()) {
+            //    $msg .= $erro . "\n";
+            //}
+            //throw new Exception\RuntimeException($msg);
         }
         //converte a assinatura em base64
         $signatureValue = base64_encode($signature);
@@ -517,7 +519,7 @@ class Pkcs12
         //retorna o documento assinado
         return $xmlResp;
     }
-    
+   
     /**
      * signatureExists
      * Check se o xml possi a tag Signature
@@ -580,10 +582,11 @@ class Pkcs12
         $objSSLPubKey = openssl_pkey_get_public($x509Certificate);
         if ($objSSLPubKey === false) {
             $msg = "Ocorreram problemas ao carregar a chave pública. Certificado incorreto ou corrompido!!";
-            while ($erro = openssl_error_string()) {
-                $msg .= $erro . "\n";
-            }
-            throw new Exception\RuntimeException($msg);
+            $this->zGetOpenSSLError($msg);
+            //while ($erro = openssl_error_string()) {
+            //    $msg .= $erro . "\n";
+            //}
+            //throw new Exception\RuntimeException($msg);
         }
         //remontando conteudo que foi assinado
         $signContent = $dom->getElementsByTagName('SignedInfo')->item(0)->C14N(false, false, null, null);
@@ -593,10 +596,11 @@ class Pkcs12
         $resp = openssl_verify($signContent, $decodedSignature, $objSSLPubKey);
         if ($resp != 1) {
             $msg = "Problema ({$resp}) ao verificar a assinatura do digital!!";
-            while ($erro = openssl_error_string()) {
-                $msg .= $erro . "\n";
-            }
-            throw new Exception\RuntimeException($msg);
+            $this->zGetOpenSSLError($msg);
+            //while ($erro = openssl_error_string()) {
+            //    $msg .= $erro . "\n";
+            //}
+            //throw new Exception\RuntimeException($msg);
         }
         return true;
     }
@@ -753,5 +757,18 @@ class Pkcs12
         $this->priKeyFile='';
         $this->certKeyFile='';
         $this->expireTimestamp='';
+    }
+    
+    /**
+     * zGetOpenSSLError
+     * @param string $msg
+     * @return string
+     */
+    protected function zGetOpenSSLError($msg = '')
+    {
+        while ($erro = openssl_error_string()) {
+            $msg .= $erro . "\n";
+        }
+        throw new Exception\RuntimeException($msg);
     }
 }

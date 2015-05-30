@@ -1,6 +1,6 @@
 <?php
 
-namespace Common\Strings;
+namespace NFePHP\Common\Strings;
 
 /**
  * Classe auxiliar para o tratamento de strings
@@ -41,14 +41,14 @@ class Strings
      */
     public static function clearXml($xml = '', $remEnc = false)
     {
+        //$xml = self::clearMsg($xml);
         $aFind = array(
             'xmlns:default="http://www.w3.org/2000/09/xmldsig#"',
+            ' standalone="no"',
             'default:',
             ':default',
-            ' standalone="no"',
             "\n",
             "\r",
-            "\s",
             "\t"
         );
         if ($remEnc) {
@@ -70,16 +70,30 @@ class Strings
      */
     public static function clearProt($procXML = '')
     {
-        $procXML1 = str_replace(
-            array('default:',':default',"\n","\r","\s"),
-            '',
-            $procXML
-        );
-        $procXML2 = str_replace(
-            'NFe xmlns="http://www.portalfiscal.inf.br/nfe" xmlns="http://www.w3.org/2000/09/xmldsig#"',
-            'NFe xmlns="http://www.portalfiscal.inf.br/nfe"',
-            $procXML1
-        );
-        return $procXML2;
+        $procXML = self::clearMsg($procXML);
+        $aApp = array('nfe','cte','mdfe');
+        foreach ($aApp as $app) {
+            $procXML = str_replace(
+                'xmlns="http://www.portalfiscal.inf.br/'.$app.'" xmlns="http://www.w3.org/2000/09/xmldsig#"',
+                'xmlns="http://www.portalfiscal.inf.br/'.$app.'"',
+                $procXML
+            );
+        }
+        return $procXML;
+    }
+    
+    /**
+     * clearMsg
+     * @param string $msg
+     * @return string
+     */
+    public static function clearMsg($msg)
+    {
+        $nmsg = str_replace(array(' standalone="no"','default:',':default',"\n","\r","\t"), '', $msg);
+        $nnmsg = str_replace('> ', '>', $nmsg);
+        if (strpos($nnmsg, '> ')) {
+            $nnmsg = self::clearMsg((string) $nnmsg);
+        }
+        return $nnmsg;
     }
 }

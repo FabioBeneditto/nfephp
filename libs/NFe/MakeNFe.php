@@ -1,36 +1,15 @@
 <?php
+
+namespace NFePHP\NFe;
+
 /**
- * Este arquivo é parte do projeto NFePHP - Nota Fiscal eletrônica em PHP.
- *
- * Este programa é um software livre: você pode redistribuir e/ou modificá-lo
- * sob os termos da Licença Pública Geral GNU (GPL)como é publicada pela Fundação
- * para o Software Livre, na versão 3 da licença, ou qualquer versão posterior
- * e/ou
- * sob os termos da Licença Pública Geral Menor GNU (LGPL) como é publicada pela Fundação
- * para o Software Livre, na versão 3 da licença, ou qualquer versão posterior.
- *
- *
- * Este programa é distribuído na esperança que será útil, mas SEM NENHUMA
- * GARANTIA; nem mesmo a garantia explícita definida por qualquer VALOR COMERCIAL
- * ou de ADEQUAÇÃO PARA UM PROPÓSITO EM PARTICULAR,
- * veja a Licença Pública Geral GNU para mais detalhes.
- *
- * Você deve ter recebido uma cópia da Licença Publica GNU e da
- * Licença Pública Geral Menor GNU (LGPL) junto com este programa.
- * Caso contrário consulte <http://www.fsfla.org/svnwiki/trad/GPLv3> ou
- * <http://www.fsfla.org/svnwiki/trad/LGPLv3>.
- *
- * Estrutura baseada nas notas técnicas:
- *          NT2013.005 versão 1.02 Dezembro de 2013
- *          
- * 
- * @package     NFePHP
- * @name        MakeNFe
- * @version     0.2.0
- * @license     http://www.gnu.org/licenses/gpl.html GNU/GPL v.3
- * @copyright   2009-2014 &copy; NFePHP
- * @link        http://www.nfephp.org/
- * @author      Roberto L. Machado <linux.rlm at gmail dot com>
+ * Classe a construção do xml da NFe modelo 55 e modelo 65
+ * @category   NFePHP
+ * @package    NFePHP\NFe\MakeNFe
+ * @copyright  Copyright (c) 2008-2015
+ * @license    http://www.gnu.org/licenses/lesser.html LGPL v3
+ * @author     Roberto L. Machado <linux.rlm at gmail dot com>
+ * @link       http://github.com/nfephp-org/nfephp for the canonical source repository
  * 
  *        CONTRIBUIDORES (em ordem alfabetica):
  *
@@ -38,24 +17,19 @@
  *              Elias Müller <elias at oxigennio dot com dot br>
  *              Marcos Vinicios Balbi <marcusbalbi at hotmail dot com>
  * 
+ * NOTA: Esta classe atende os padrões estabelecidos pela 
+ * NOTA TÉCNICA 2013.005 Versão 1.22 de Novembro 2014
  */
 
-namespace NFe;
 
-use Common\Dom\Dom;
-use Common\DateTime\DateTime;
+
+use NFePHP\Common\DateTime\DateTime;
+use NFePHP\Common\Base\BaseMake;
 use \DOMDocument;
 use \DOMElement;
 
-class MakeNFe
+class MakeNFe extends BaseMake
 {
-    /**
-     * erros
-     * Matriz contendo os erros reportados pelas tags obrigatórias
-     * e sem conteúdo
-     * @var array
-     */
-    public $erros = array();
     /**
      * versao
      * numero da versão do xml da NFe
@@ -68,24 +42,6 @@ class MakeNFe
      * @var integer
      */
     public $mod = 55;
-    /**
-     * xml
-     * String com o xml da NFe montado
-     * @var string
-     */
-    public $xml = '';
-    /**
-     * dom
-     * Variável onde será montado o xml da NFe
-     * @var DOMDocument
-     */
-    public $dom;
-    /**
-     * tpAmb
-     * tipo de ambiente 
-     * @var string
-     */
-    public $tpAmb = '2';
     /**
      * chave da NFe
      * @var string
@@ -143,27 +99,7 @@ class MakeNFe
     private $aProcRef = array(); //array de DOMNodes
     private $aForDia = array(); //array de DOMNodes
     private $aDeduc = array(); //array de DOMNodes
-
-    /**
-     * __contruct
-     * Função construtora cria um objeto DOMDocument
-     * que será carregado com a NFe
-     */
-    public function __construct()
-    {
-        $this->dom = new Dom();
-    }
-    
-    /**
-     * getXML
-     * retorna o xml da NFe que foi montado
-     * @return string
-     */
-    public function getXML()
-    {
-        return $this->xml;
-    }
-    
+  
     /**
      * montaNFe
      * Método de montagem do xml da NFe 
@@ -229,25 +165,6 @@ class MakeNFe
         $this->xml = $this->dom->saveXML();
         return true;
     }
-
-    /**
-     * montaChave
-     * @param string $cUF
-     * @param string $ano
-     * @param string $mes
-     * @param string $cnpj
-     * @param string $mod
-     * @param string $serie
-     * @param string $nNF
-     * @param string $tpEmis
-     * @param string $cNF
-     * @return string
-     */
-    public function montaChave($cUF, $ano, $mes, $cnpj, $mod, $serie, $nNF, $tpEmis, $cNF)
-    {
-        return $this->zBuildKey($cUF, $ano, $mes, $cnpj, $mod, $serie, $nNF, $tpEmis, $cNF);
-    }
-    
     
     /**
      * taginfNFe
@@ -699,8 +616,20 @@ class MakeNFe
             false,
             $identificador . "Inscrição Municipal do Prestador de Serviço do emitente"
         );
-        $this->dom->addChild($this->emit, "CNAE", $cnae, false, $identificador . "CNAE fiscal do emitente");
-        $this->dom->addChild($this->emit, "CRT", $crt, true, $identificador . "Código de Regime Tributário do emitente");
+        $this->dom->addChild(
+            $this->emit,
+            "CNAE",
+            $cnae,
+            false,
+            $identificador . "CNAE fiscal do emitente"
+        );
+        $this->dom->addChild(
+            $this->emit,
+            "CRT",
+            $crt,
+            true,
+            $identificador . "Código de Regime Tributário do emitente"
+        );
         return $this->emit;
     }
     
@@ -736,7 +665,13 @@ class MakeNFe
     ) {
         $identificador = 'C05 <enderEmit> - ';
         $this->enderEmit = $this->dom->createElement("enderEmit");
-        $this->dom->addChild($this->enderEmit, "xLgr", $xLgr, true, $identificador . "Logradouro do Endereço do emitente");
+        $this->dom->addChild(
+            $this->enderEmit,
+            "xLgr",
+            $xLgr,
+            true,
+            $identificador . "Logradouro do Endereço do emitente"
+        );
         $this->dom->addChild($this->enderEmit, "nro", $nro, true, $identificador . "Número do Endereço do emitente");
         $this->dom->addChild(
             $this->enderEmit,
@@ -794,7 +729,13 @@ class MakeNFe
             false,
             $identificador . "Nome do País do Endereço do emitente"
         );
-        $this->dom->addChild($this->enderEmit, "fone", $fone, false, $identificador . "Telefone do Endereço do emitente");
+        $this->dom->addChild(
+            $this->enderEmit,
+            "fone",
+            $fone,
+            false,
+            $identificador . "Telefone do Endereço do emitente"
+        );
         $node = $this->emit->getElementsByTagName("IE")->item(0);
         $this->emit->insertBefore($this->enderEmit, $node);
         return $this->enderEmit;
@@ -828,74 +769,56 @@ class MakeNFe
     ) {
         $identificador = 'E01 <dest> - ';
         $this->dest = $this->dom->createElement("dest");
-        if ($this->tpAmb == '2') {
-            $this->dom->addChild(
-                $this->dest,
-                "CNPJ",
-                '99999999000191',
-                true,
-                $identificador . "CNPJ do destinatário"
-            );
-            $this->dom->addChild(
-                $this->dest,
-                "xNome",
-                'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL',
-                true,
-                $identificador . "Razão Social ou nome do destinatário"
-            );
-        } else {
-            if ($cnpj != '') {
-                $this->dom->addChild(
-                    $this->dest,
-                    "CNPJ",
-                    $cnpj,
-                    true,
-                    $identificador . "CNPJ do destinatário"
-                );
-            } elseif ($cpf != '') {
-                $this->dom->addChild(
-                    $this->dest,
-                    "CPF",
-                    $cpf,
-                    true,
-                    $identificador . "CPF do destinatário"
-                );
-            } else {
-                $this->dom->addChild(
-                    $this->dest,
-                    "idEstrangeiro",
-                    $idEstrangeiro,
-                    true,
-                    $identificador . "Identificação do destinatário no caso de comprador estrangeiro"
-                );
-            }
-            $this->dom->addChild(
-                $this->dest,
-                "xNome",
-                $xNome,
-                true,
-                $identificador . "Razão Social ou nome do destinatário"
-            );
+        if (($numIE == 'ISENTO' || $numIE == '') && $indIEDest == '1') {
+            $indIEDest = '2';
         }
         if ($this->mod == '65') {
             $indIEDest = '9';
+        }
+        if ($this->tpAmb == '2') {
+            $xNome = 'NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL';
+        }
+        if ($cnpj != '') {
             $this->dom->addChild(
                 $this->dest,
-                "indIEDest",
-                $indIEDest,
+                "CNPJ",
+                $cnpj,
                 true,
-                $identificador . "Indicador da IE do Destinatário"
+                $identificador . "CNPJ do destinatário"
+            );
+        } elseif ($cpf != '') {
+            $this->dom->addChild(
+                $this->dest,
+                "CPF",
+                $cpf,
+                true,
+                $identificador . "CPF do destinatário"
             );
         } else {
             $this->dom->addChild(
                 $this->dest,
-                "indIEDest",
-                $indIEDest,
+                "idEstrangeiro",
+                $idEstrangeiro,
                 true,
-                $identificador . "Indicador da IE do Destinatário"
+                $identificador . "Identificação do destinatário no caso de comprador estrangeiro"
             );
+            $indIEDest = '9';
         }
-        if ($indIEDest != '9' && $indIEDest != '2' && $this->tpAmb == '1') {
+        $this->dom->addChild(
+            $this->dest,
+            "xNome",
+            $xNome,
+            true,
+            $identificador . "Razão Social ou nome do destinatário"
+        );
+        $this->dom->addChild(
+            $this->dest,
+            "indIEDest",
+            $indIEDest,
+            true,
+            $identificador . "Indicador da IE do Destinatário"
+        );
+        if ($numIE != '' && $numIE != 'ISENTO') {
             $this->dom->addChild(
                 $this->dest,
                 "IE",
@@ -1586,7 +1509,7 @@ class MakeNFe
      * @param string $nItem
      * @param string $nDI
      * @param string $nAdicao
-     * @param string $nSeqAdicC
+     * @param string $nSeqAdic
      * @param string $cFabricante
      * @param string $vDescDI
      * @param string $nDraw
@@ -1596,18 +1519,48 @@ class MakeNFe
         $nItem = '',
         $nDI = '',
         $nAdicao = '',
-        $nSeqAdicC = '',
+        $nSeqAdic = '',
         $cFabricante = '',
         $vDescDI = '',
         $nDraw = ''
     ) {
         $identificador = 'I25 <adi> - ';
         $adi = $this->dom->createElement("adi");
-        $this->dom->addChild($adi, "nAdicao", $nAdicao, true, $identificador . "[item $nItem] Número da Adição");
-        $this->dom->addChild($adi, "nSeqAdicC", $nSeqAdicC, true, $identificador . "[item $nItem] Número sequencial do item dentro da Adição");
-        $this->dom->addChild($adi, "cFabricante", $cFabricante, true, $identificador . "[item $nItem] Código do fabricante estrangeiro");
-        $this->dom->addChild($adi, "vDescDI", $vDescDI, false, $identificador . "[item $nItem] Valor do desconto do item da DI Adição");
-        $this->dom->addChild($adi, "nDraw", $nDraw, false, $identificador . "[item $nItem] Número do ato concessório de Drawback");
+        $this->dom->addChild(
+            $adi,
+            "nAdicao",
+            $nAdicao,
+            true,
+            $identificador . "[item $nItem] Número da Adição"
+        );
+        $this->dom->addChild(
+            $adi,
+            "nSeqAdic",
+            $nSeqAdic,
+            true,
+            $identificador . "[item $nItem] Número sequencial do item dentro da Adição"
+        );
+        $this->dom->addChild(
+            $adi,
+            "cFabricante",
+            $cFabricante,
+            true,
+            $identificador . "[item $nItem] Código do fabricante estrangeiro"
+        );
+        $this->dom->addChild(
+            $adi,
+            "vDescDI",
+            $vDescDI,
+            false,
+            $identificador . "[item $nItem] Valor do desconto do item da DI Adição"
+        );
+        $this->dom->addChild(
+            $adi,
+            "nDraw",
+            $nDraw,
+            false,
+            $identificador . "[item $nItem] Número do ato concessório de Drawback"
+        );
         $this->aAdi[$nItem][$nDI][] = $adi;
         //colocar a adi em seu DI respectivo
         $nodeDI = $this->aDI[$nItem][$nDI];
@@ -3962,7 +3915,7 @@ class MakeNFe
         $cNF = $ide->getElementsByTagName('cNF')->item(0)->nodeValue;
         $chave = str_replace('NFe', '', $infNFe->getAttribute("Id"));
         $tempData = explode("-", $dhEmi);
-        $chaveMontada = $this->zBuildKey(
+        $chaveMontada = $this->montaChave(
             $cUF,
             $tempData[0] - 2000,
             $tempData[1],
@@ -3981,66 +3934,5 @@ class MakeNFe
             $infNFe->setAttribute("Id", "NFe" . $chaveMontada);
             $this->chNFe = $chaveMontada;
         }
-    }
-    
-    /**
-     * zBuildKey
-     * @param string $cUF
-     * @param string $ano
-     * @param string $mes
-     * @param string $cnpj
-     * @param string $mod
-     * @param string $serie
-     * @param string $nNF
-     * @param string $tpEmis
-     * @param string $cNF
-     * @return string
-     */
-    private function zBuildKey($cUF, $ano, $mes, $cnpj, $mod, $serie, $nNF, $tpEmis, $cNF)
-    {
-        $forma = "%02d%02d%02d%s%02d%03d%09d%01d%08d";
-        $chave = sprintf(
-            $forma,
-            $cUF,
-            $ano,
-            $mes,
-            $cnpj,
-            $mod,
-            $serie,
-            $nNF,
-            $tpEmis,
-            $cNF
-        );
-        return $chave.$this->zCalculaDV($chave);
-    }
-    
-    /**
-     * zCalculaDV
-     * Função para o calculo o digito verificador da chave da NFe
-     * 
-     * @name calculaDV
-     * @param string $chave43
-     * @return string 
-     */
-    private function zCalculaDV($chave43)
-    {
-        $multiplicadores = array(2, 3, 4, 5, 6, 7, 8, 9);
-        $iCount = 42;
-        $somaPonderada = 0;
-        while ($iCount >= 0) {
-            for ($mCount = 0; $mCount < count($multiplicadores) && $iCount >= 0; $mCount++) {
-                $num = (int) substr($chave43, $iCount, 1);
-                $peso = (int) $multiplicadores[$mCount];
-                $somaPonderada += $num * $peso;
-                $iCount--;
-            }
-        }
-        $resto = $somaPonderada % 11;
-        if ($resto == '0' || $resto == '1') {
-            $cDV = 0;
-        } else {
-            $cDV = 11 - $resto;
-        }
-        return $cDV;
     }
 }
